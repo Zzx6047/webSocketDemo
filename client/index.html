@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <script src="https://cdn.staticfile.org/vue/2.6.11/vue.min.js"></script>
 </head>
+
 <body>
   <input type="text" id="msg"></input>
   <button type="button" id="send">按钮</button>
@@ -29,15 +31,15 @@
       console.log('websocket连接失败');
     }
     document.getElementById('send').addEventListener('click', function () {
-       var inputValue = document.getElementById('msg').value
-       ws.send(inputValue)
-       document.getElementById('msg').value = ''
+      var inputValue = document.getElementById('msg').value
+      ws.send(inputValue)
+      document.getElementById('msg').value = ''
     })
 
     document.getElementById('close').addEventListener('click', function () {
-       ws.close()
+      ws.close()
     })
-
   </script>
 </body>
+
 </html>

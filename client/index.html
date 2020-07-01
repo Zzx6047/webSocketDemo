@@ -11,7 +11,14 @@
 <body>
   <div id="app">
     <div v-if="isShow">
-      <input type="text" v-model="name">
+      <p>
+        昵称：
+        <input type="text" v-model="name">
+      </p>
+      <p>
+        房间号：
+        <input type="text" v-model="roomid">
+      </p>
       <button type="button" @click="enter()">进入聊天室</button>
     </div>
     <div v-else>
@@ -34,6 +41,7 @@
         lists: [],
         ws: {},
         name: '',
+        roomid: '',
         isShow: true,
         num: 0
       },
@@ -52,14 +60,15 @@
           this.isShow = false
           this.ws.send(JSON.stringify({
             event: 'enter',
-            message: this.name
+            message: this.name,
+            roomid: this.roomid
           }))
         },
         onOpen() {
           console.log('open:' + this.ws.readyState);
         },
         onMessage(event) {
-          if(this.isShow = true) {
+          if(this.isShow) {
             return
           }
           var obj = JSON.parse(event.data)

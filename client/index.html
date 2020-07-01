@@ -9,35 +9,89 @@
 </head>
 
 <body>
-  <input type="text" id="msg"></input>
-  <button type="button" id="send">按钮</button>
-  <button type="button" id="close">关闭连接</button>
-  <script>
-    var ws = new WebSocket('ws://127.0.0.1:3000')
-    ws.onopen = function () {
-      console.log('open:' + ws.readyState);
-      // ws.send('Hello from client')
-    }
-    ws.onmessage = function (event) {
-      console.log('message:' + ws.readyState);
-      console.log(event.data)
-    }
-    ws.onclose = function () {
-      console.log('close:' + ws.readyState);
-      console.log('已关闭websocket');
-    }
-    ws.onerror = function () {
-      console.log('error:' + ws.readyState);
-      console.log('websocket连接失败');
-    }
-    document.getElementById('send').addEventListener('click', function () {
-      var inputValue = document.getElementById('msg').value
-      ws.send(inputValue)
-      document.getElementById('msg').value = ''
-    })
+  <div id="app">
+    <div v-if="isShow">
+      <input type="text" v-model="name">
+      <button type="button" @click="enter()">进入聊天室</button>
+    </div>
+    <div v-else>
+      <ul>
+        <li v-for="(item, index) in lists" :key="'message' + index">{{item}}</li>
+        <li>在线人数{{num}}</li>
+      </ul>
+      <div class="ctrl">
+        <input type="text" v-model="message"></input>
+        <button type="button" @click="send()">按钮</button>
+      </div>
+    </div>
+  </div>
 
-    document.getElementById('close').addEventListener('click', function () {
-      ws.close()
+  <script>
+    var app = new Vue({
+      el: "#app",
+      data: {
+        message: '',
+        lists: [],
+        ws: {},
+        name: '',
+        isShow: true,
+        num: 0
+      },
+      mounted() {
+        this.ws = new WebSocket('ws://127.0.0.1:3000')
+        this.ws.onopen = this.onOpen
+        this.ws.onmessage = this.onMessage
+        this.ws.onclose = this.onClose
+        this.ws.onerror = this.onError
+      },
+      methods: {
+        enter() {
+          if(this.name.trim() === '') {
+            alert('用户名不得为空')
+          }
+          this.isShow = false
+          this.ws.send(JSON.stringify({
+            event: 'enter',
+            message: this.name
+          }))
+        },
+        onOpen() {
+          console.log('open:' + this.ws.readyState);
+        },
+        onMessage(event) {
+          if(this.isShow = true) {
+            return
+          }
+          var obj = JSON.parse(event.data)
+          if(obj.event === 'enter') {
+            this.lists.push('欢迎：'+ obj.message + '加入聊天室')
+          } else if(obj.event === 'out') {
+            this.lists.push(obj.name + '已经退出聊天室')
+          } else {
+            if(obj.name !== this.name) {
+              this.lists.push(obj.name + ':' +obj.message);
+            }
+          }
+          this.num = obj.num
+        },
+        onClose() {
+          console.log('close:' + this.ws.readyState);
+          console.log('已关闭websocket');
+        },
+        onError() {
+          console.log('error:' + this.ws.readyState);
+          console.log('websocket连接失败');
+        },
+        send() {
+          this.lists.push(this.message)
+          this.ws.send(JSON.stringify({
+            event: 'message',
+            message: this.message,
+            name: this.name
+          }))
+          this.message = ''
+        }
+      }
     })
   </script>
 </body>
